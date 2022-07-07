@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "inquirer": "^6.5.2",
+    "node-fetch": "^2.6.1"
+  }
+}
