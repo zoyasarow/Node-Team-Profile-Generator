@@ -1,28 +1,35 @@
 //linking npm requirements and classes
 const fs = require('fs');
 const inquirer = require('inquirer');
-const Engineer = require('./Utils/Lib/engineer');
-const Manager = require('./Utils/Lib/manager');
-const Intern = require('./Utils/Lib/intern');
-const Team = require('./Utils/Lib/team');
+const Engineer = require('./Lib/Lib/engineer');
+const Manager = require('./Lib/Lib/manager');
+const Intern = require('./Lib/Lib/intern');
+var teamArray = []
 
-const team = new Team();
-
-//function for adding team members 
-function createMember(option) {
-    if (option === 'addEngineer') {
-        addEngineer();
+//starting prompts
+function start() {
+    console.table(teamArray)
+  inquirer.prompt([
+    {
+      type: 'list',
+      message: "Would you like to add a team member?",
+      name: 'newMember',
+      choices: [ "Add Manager", "Add Engineer", "Add Intern", "Finish"]
     }
-    if (option === 'addIntern') {
-        addIntern();
-    }
-    if (option === 'addManager') {
-        addManager();
-    }    
-    if (option === 'finish') {
-        team.saveFile();
-    }
-}
+    ]).then(response =>{
+    console.log(response.newMember)
+  
+ //prompt choices
+    if (response.newMember === "Add Manager"){
+      return addManager()
+    } else if (response.newMember === "Add Engineer"){
+      return addEngineer()
+    } else if (response.newMember === "Add Intern") {
+      return addIntern()
+    } else {
+      return finish()
+    } 
+  })};
 
 //function per each position
 //for Engineers
@@ -49,24 +56,7 @@ function addEngineer() {
                 message: 'Please enter the engineers gitHub username',
                 name: 'engineerGithub',   
               },
-              {
-                type: 'list',
-                name: 'addMore',
-                choices: [
-                    {
-                        value: 'addEngineer',
-                        name: 'Add Engineer',
-                    },
-                    {
-                        value: 'addIntern',
-                        name: 'Add Intern',
-                    },
-                    {
-                        value: 'finish',
-                        name: 'Finish',
-                    },
-                ]
-              },
+            
         ]).then((data) => {
             const engineer = new Engineer (
                 data.engineerName,
@@ -74,8 +64,8 @@ function addEngineer() {
                 data.engineerEmail,
                 data.engineerGithub
             );
-            team.addMember(engineer);
-            createMember(data.addMore);
+            teamArray.push(engineer);
+            return start();
         });
 }
 
@@ -103,24 +93,7 @@ function addIntern() {
                 message: 'What school does the Intern attend?',
                 name: 'internSchool',   
               },
-              {
-                type: 'list',
-                name: 'addMore',
-                choices: [
-                    {
-                        value: 'addEngineer',
-                        name: 'Add Engineer',
-                    },
-                    {
-                        value: 'addIntern',
-                        name: 'Add Intern',
-                    },
-                    {
-                        value: 'finish',
-                        name: 'Finish',
-                    },
-                ]
-              },
+              
         ]).then((data) => {
             const intern = new Intern(
                 data.internName,
@@ -128,8 +101,8 @@ function addIntern() {
                 data.internEmail,
                 data.internSchool
             );
-            team.addMember(intern);
-            createMember(data.addMore);
+            teamArray.push(intern);
+            return start();
         });
     } 
  
@@ -154,27 +127,10 @@ function addManager() {
               },  
               {
                 type: 'input',
-                message: 'What is the team Mnangers office number?',
+                message: 'What is the team Managers office number?',
                 name: 'managerPhone',   
               },
-              {
-                type: 'list',
-                name: 'addMore',
-                choices: [
-                    {
-                        value: 'addEngineer',
-                        name: 'Add Engineer',
-                    },
-                    {
-                        value: 'addIntern',
-                        name: 'Add Intern',
-                    },
-                    {
-                        value: 'finish',
-                        name: 'Finish',
-                    },
-                ]
-              },
+              
         ]).then((data) => {
             const manager = new Manager (
                 data.managerName,
@@ -182,34 +138,58 @@ function addManager() {
                 data.managerEmail,
                 data.managerPhone
             );
-            team.addMember(manager);
-            createMember(data.addMore);
+            teamArray.push(manager);
+            return start();
         });
     } 
+    start();
 
-// function to create the HTML team profile
-function generateHTML() {
-    const allTeam = JSON.stringify(team);
-    fs.writeFile('team.txt', allTeam, 'utf-8', (err) => {
-        if(err) {
-            console.log(err);
-        } else {
-            console.log('Team Profile Created!');
-        }
-    });
-  }
+// function to create the HTML for team profile
+function generateHTML(cards) {
+    return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+        <link href="./style.css" rel="stylesheet">
+        </head>
+        <body>
+        <div class="title-info">
+        <title id="title">Team Profile</title>
+        <p id="description"> Explore our team members & contact them with the information on each card!</p>
+        </div>
+            ${cards} 
+        </body>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+        </html>`
+    }   
 
-generateHTML()
+//for loop for card generation
+function finish() {
+    let cards = ""
+    for (let i = 0; i < (teamArray.length); i++) {
+        console.log(teamArray[i].renderSpecificHTML());
+        cards += teamArray[i].renderSpecificHTML();
+    }
+    fs.writeFile("index.html", generateHTML(cards), err => {
+        if (err) throw err });
+};
 
-// function init() {
-//     inquirer.prompt().then(userInput => {
-//         const merging = path.join(generateHTML, 'team.txt')
-//         fs.writeFile(merging, generateHTML(userInput))
-//         console.log('Created!')
-//     })
-// }
+module.exports = addEngineer;
+module.exports = addIntern;
+module.exports = addManager;
+module.exports = generateHTML;
+module.exports = finish;
 
-// init()
+
+
+
+
+
+
+
 
 
 
