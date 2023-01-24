@@ -1,7 +1,7 @@
 
 # Node-Team-Profile-Generator
 
-Video Walk-Through: https://drive.google.com/file/d/1BoA3S-Lq5jIlma5WlJArQoOo8CSwQqic/view 
+[Demo Video](https://drive.google.com/file/d/1BoA3S-Lq5jIlma5WlJArQoOo8CSwQqic/view)
 
 ## Description 
 This application uses Node & Inquirer to allow workplaces & teams to enter information about each employee broken down by job title in order to create a team profile with accessible contact information!
